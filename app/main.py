@@ -1,8 +1,17 @@
 from fastapi import FastAPI
 import pandas as pd
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_FOLDER = os.path.join(BASE_DIR, "data")
@@ -25,8 +34,10 @@ def get_stock_data(symbol: str):
 
     symbol = symbol.strip().upper()
 
-    if not symbol.endswith(".NS"):
+    if ".NS" not in symbol:
         symbol += ".NS"
+
+    print("Requested symbol:", symbol)
 
     file_path = os.path.join(DATA_FOLDER, f"{symbol}.csv")
 
@@ -47,8 +58,10 @@ def get_summary(symbol: str):
 
     symbol = symbol.strip().upper()
 
-    if not symbol.endswith(".NS"):
+    if ".NS" not in symbol:
         symbol += ".NS"
+
+    print("Requested symbol:", symbol)
 
     file_path = os.path.join(DATA_FOLDER, f"{symbol}.csv")
 
@@ -76,10 +89,12 @@ def compare_stocks(symbol1: str, symbol2: str):
     def get_data(symbol):
         symbol = symbol.strip().upper()
 
-        if not symbol.endswith(".NS"):
+        if ".NS" not in symbol:
             symbol += ".NS"
 
         file_path = os.path.join(DATA_FOLDER, f"{symbol}.csv")
+
+        print("Requested symbol:", symbol)
 
         if not os.path.exists(file_path):
             return None, symbol
