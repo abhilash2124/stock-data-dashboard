@@ -24,15 +24,28 @@ function App() {
   const [s1, setS1] = useState("");
   const [s2, setS2] = useState("");
   const [compareData, setCompareData] = useState(null);
+  const [gainer, setGainer] = useState(null);
+  const [days, setDays] = useState(30);
 
-  // Fetch companies
   useEffect(() => {
     fetch("http://127.0.0.1:8000/companies")
       .then(res => res.json())
       .then(data => setCompanies(data.companies));
   }, []);
 
-  // Fetch stock data
+  useEffect(() => {
+    if (selected) {
+      fetchData(selected);
+    }
+  }, [days]);
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/top-gainer")
+      .then(res => res.json())
+      .then(data => setGainer(data));
+  }, []);
+
+
   const fetchData = (symbol) => {
     console.log("STEP 1");
 
@@ -47,7 +60,8 @@ function App() {
       })
       .then(data => {
         console.log("STEP 4", data);
-        setData(data?.data || []);
+        // setData(data?.data || []);
+        setData(data.data.slice(-days));
       })
       .catch(err => console.error("Error:", err));
 
@@ -62,7 +76,13 @@ function App() {
       <h1 style={{ textAlign: "center" }}>
         📊 Stock Dashboard
       </h1>
-      <div style={{ display: "flex", height: "100vh" }}>
+      <div style={{
+        padding: "10px",
+        margin: "5px",
+        borderRadius: "5px",
+        background: "#e8f3eaff",
+        display: "flex", height: "100vh"
+      }}>
 
         <div style={{ width: "200px", borderRight: "1px solid gray", padding: "10px" }}>
           <h3>Companies</h3>
@@ -76,6 +96,13 @@ function App() {
               {c}
             </button>
           ))}
+        </div>
+
+        <div style={{ marginBottom: "10px" }}>
+          <select onChange={(e) => setDays(Number(e.target.value))}>
+            <option value={30}>30 Days</option>
+            <option value={90}>90 Days</option>
+          </select>
         </div>
 
         <div style={{ flex: 1, padding: "20px" }}>
@@ -112,7 +139,17 @@ function App() {
           )}
         </div>
 
+
         <div style={{ width: "250px", borderLeft: "1px solid gray", padding: "10px" }}>
+
+          <div style={{ marginTop: "20px" }}>
+            <h3>🔥 Top Gainer</h3>
+            {gainer && (
+              <div>
+                <p>{gainer.stock} ({(gainer.return * 100).toFixed(2)}%)</p>
+              </div>
+            )}
+          </div>
           <h3>Compare Stocks</h3>
 
           <select onChange={(e) => setS1(e.target.value)}>
@@ -132,6 +169,7 @@ function App() {
           </select>
 
           <br /><br />
+
 
           <button
             onClick={() => {
@@ -163,7 +201,6 @@ function App() {
             </div>
           )}
         </div>
-
       </div>
     </>
   );
